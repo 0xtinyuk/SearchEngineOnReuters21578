@@ -11,7 +11,7 @@ public class Main {
 	ArrayList<Document> docs;
 	Dictionary dictionary;
 	ArrayList<Document> rdocs;
-	boolean hasDict=false,hasStemmed,hasStopword,hasNormalized,hasReuters;
+	boolean hasDict=false,hasStemmed,hasStopword,hasNormalized,hasReuters,hasTopicAssign;
 	public int reutersFileAmount = 1;
 
 	public void preProcessing(){
@@ -30,25 +30,28 @@ public class Main {
 		rdocs = cp.reuters(fileAmount);
 	}
 	
-	public String queryExpension(String query,boolean stemming, boolean stopword, boolean normalization,boolean reuters){
+	public String queryExpension(String query,boolean stemming, boolean stopword, boolean normalization,boolean reuters,boolean topicAssign){
 		String[] wordlist = query.split(" ");
 		SnowballStemmer stemmer = new englishStemmer();
 		if(reuters){
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(rdocs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				inputReuters(reutersFileAmount);
+				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		else{
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(docs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				dictionary.build(docs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		if(!dictionary.hasExpension) dictionary.buildQueryExpension();
@@ -74,26 +77,29 @@ public class Main {
 		return expensionMessage;
 	}
 	
-	public String queryCompletion(String query,boolean stemming, boolean stopword, boolean normalization,boolean reuters){
+	public String queryCompletion(String query,boolean stemming, boolean stopword, boolean normalization,boolean reuters, boolean topicAssign){
 		String[] wordlist = query.split(" ");
 		SnowballStemmer stemmer = new englishStemmer();
 		String word = wordlist[wordlist.length-1].toLowerCase();
 		if(reuters){
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(rdocs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				inputReuters(reutersFileAmount);
+				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		else{
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(docs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				dictionary.build(docs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		if(!dictionary.hasCompletion) dictionary.buildQueryCompletion();
@@ -116,23 +122,26 @@ public class Main {
 		return completionMessage;
 	}
 	
-	public String search(String query, boolean stemming, boolean stopword, boolean normalization, boolean booleanModel,boolean reuters){
+	public String search(String query, boolean stemming, boolean stopword, boolean normalization, boolean booleanModel,boolean reuters,boolean topicAssign){
 		if(reuters){
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(rdocs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				inputReuters(reutersFileAmount);
+				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		else{
-			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) && (hasStopword==stopword) && (hasNormalized==normalization)){
+			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
+					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				dictionary.build(docs, stopword,stemming, normalization);
-				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;
+				dictionary.build(docs, stopword,stemming, normalization,reuters,topicAssign);
+				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
 		String result = "";
@@ -144,7 +153,8 @@ public class Main {
 			for (Integer index : resultIndex) {
 				if(reuters){
 					//System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
-					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+/*"\nDesc: "+rdocs.get(index).description+*/"\n\n";
+					//result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopic:"+rdocs.get(index).topic+"\nDesc: "+rdocs.get(index).description+"\n\n";
+					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopic: "+rdocs.get(index).topic/*+"\nDesc: "+rdocs.get(index).description*/+"\n\n";
 				}
 				else{
 					//System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
@@ -162,7 +172,8 @@ public class Main {
 				for(Document document : rdocs){
 					if(document.score <=0) break;
 					//System.out.println("docId:"+document.docID+"\ntitle:"+document.title+"\ndesc:"+document.description);
-					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+/*"\nDesc: "+document.description+*/"\n\n";
+					//result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic:"+document.topic+"\nDesc: "+document.description+"\n\n";
+					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic: "+document.topic+/*"\nDesc: "+document.description+*/"\n\n";
 				}
 			}
 			else{

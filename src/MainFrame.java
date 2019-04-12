@@ -142,6 +142,8 @@ public class MainFrame {
 		
 		JCheckBox chckbx_normalization = new JCheckBox("normalization");
 		panel_Options.add(chckbx_normalization);
+		JCheckBox chckbx_TopicAssign = new JCheckBox("TopicAssign");
+		panel_Options.add(chckbx_TopicAssign);
 		
 		JPanel panel_Result = new JPanel();
 		frame.getContentPane().add(panel_Result);
@@ -164,7 +166,8 @@ public class MainFrame {
 				boolean normalization = chckbx_normalization.isSelected();
 				boolean stopword = chckbx_Stopword.isSelected();
 				boolean bm = rdbtn_BooleanModel.isSelected();
-				String result = Do.search(query,stemming,stopword,normalization,bm,reuters);
+				boolean topicAssign = chckbx_TopicAssign.isSelected();
+				String result = Do.search(query,stemming,stopword,normalization,bm,reuters,topicAssign);
 				textArea_Result.setText(result);
 			}
 		});
@@ -178,7 +181,8 @@ public class MainFrame {
 				boolean stemming = chckbx_stemming.isSelected();
 				boolean normalization = chckbx_normalization.isSelected();
 				boolean stopword = chckbx_Stopword.isSelected();
-				String suggestion = Do.queryCompletion(query,stemming,stopword,normalization,reuters);
+				boolean topicAssign = chckbx_TopicAssign.isSelected();
+				String suggestion = Do.queryCompletion(query,stemming,stopword,normalization,reuters,topicAssign);
 				JOptionPane.showMessageDialog(null, suggestion,"Query Completion",JOptionPane.PLAIN_MESSAGE);
 			}
 		});
@@ -192,7 +196,8 @@ public class MainFrame {
 				boolean stemming = chckbx_stemming.isSelected();
 				boolean normalization = chckbx_normalization.isSelected();
 				boolean stopword = chckbx_Stopword.isSelected();
-				String expensionStr = Do.queryExpension(query,stemming,stopword,normalization,reuters);
+				boolean topicAssign = chckbx_TopicAssign.isSelected();
+				String expensionStr = Do.queryExpension(query,stemming,stopword,normalization,reuters,topicAssign);
 				JOptionPane.showMessageDialog(null, expensionStr,"Query Expension",JOptionPane.PLAIN_MESSAGE);
 			}
 		});

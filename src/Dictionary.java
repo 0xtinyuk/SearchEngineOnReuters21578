@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 public class Dictionary {
 	public HashMap<String,HashSet<Integer>> dict;
 	public HashSet<String> stopwords;
-	public ArrayList<Double> weight;
+	public HashMap<Integer, HashSet<String>> wordset;
+	//public ArrayList<Double> weight;
 	public String dictString;
 	private HashMap<String, ArrayList<Integer>> tf;
 	public HashMap<String, ArrayList<Double>> tfidf;
@@ -22,6 +23,7 @@ public class Dictionary {
 	private int completionListLength = 10;//The max amount of options of completion for each word
 	private int expensionListLength = 5;//The max amount of options of completion for each word
 	private double expensionThreshold = 0.1;
+	private int knn = 5;//the k for K-NN
 	
 	public Dictionary(){
 		dict = new HashMap<String,HashSet<Integer>>();
@@ -49,14 +51,14 @@ public class Dictionary {
         fin.close();
 	}
 	
-	public void build(ArrayList<Document> docs, boolean stopword, boolean stemming, boolean normalization){
+	public void build(ArrayList<Document> docs, boolean stopword, boolean stemming, boolean normalization,boolean reuters,boolean needTopicAssign){
 		this.stopword = stopword;
 		this.stemming = stemming;
 		this.normalization = normalization;
 		String norRegex = "[\\-\\.,\\(\\)\"\'\\?\\;]";
 		String splitRegex = "[ \\/\\n]";
 		//String splitRegex = "[\\s\\S]";
-		this.weight = new ArrayList<Double>();
+		//this.weight = new ArrayList<Double>();
 		
 		dict = new HashMap<String,HashSet<Integer>>();
 		dictString = "";
@@ -145,9 +147,12 @@ public class Dictionary {
 	
 		}
 		
+		wordset = new HashMap<Integer, HashSet<String>>();
+		
 		for (int i = 0; i < docs.size(); i++) {
 			Document doc = docs.get(i);
 			String[] wordlist = doc.title.split(splitRegex);
+			HashSet<String> TempSet = new HashSet<String>();
 			for (String str : wordlist) {
 				str = str.toLowerCase();
 				if(normalization){
@@ -163,6 +168,7 @@ public class Dictionary {
 					}
 				}
 				if(isNumeric(str))continue;
+				TempSet.add(str);
 				if(tf.containsKey(str)){
 					ArrayList<Integer> tempArr = tf.get(str);
 					if(tempArr.size()<i+1)
@@ -203,6 +209,7 @@ public class Dictionary {
 					}
 				}
 				if(isNumeric(str))continue;
+				TempSet.add(str);
 				if(tf.containsKey(str)){
 					ArrayList<Integer> tempArr = tf.get(str);
 					if(tempArr.size()<i+1)
@@ -223,6 +230,7 @@ public class Dictionary {
 				}
 				//System.out.println(str);
 			}
+			wordset.put(doc.docID, TempSet);//Store all the words the document contains
 	
 		}
 		tfidf = new HashMap<String, ArrayList<Double>>();
@@ -249,6 +257,7 @@ public class Dictionary {
 		
 		hasExpension=false;
 		hasCompletion=false;
+		if(reuters && needTopicAssign) topicsAssign(docs);
 		//buildQueryCompletion();//build up query completion
 		//buildQueryExpension();
 
@@ -275,6 +284,47 @@ public class Dictionary {
 			return 0;
 		}
     };
+    
+    private double docDistance(int x,int y){//return the distance of doc x and doc y
+    	HashSet<String> Temp = (HashSet<String>)wordset.get(x).clone();
+		Temp.retainAll(wordset.get(y));
+		int intersection = Temp.size();
+		Temp = (HashSet<String>)wordset.get(x).clone();
+		Temp.addAll(wordset.get(y));
+		int union=Temp.size();
+		return ((double)intersection)/((double)union);
+    }
+    
+    public void topicsAssign(ArrayList<Document> docs){
+    	for (int i = 0; i < docs.size(); i++) 
+    		if(docs.get(i).topic.equals("")){
+    			ArrayList<AbstractMap.SimpleEntry<String,Double>> temp = new ArrayList<AbstractMap.SimpleEntry<String,Double>>();
+    			for (int j = 0; j < docs.size(); j++) 
+    				if(i!=j && !docs.get(j).topic.equals("")){
+    					double similarity = docDistance(i, j);
+    					temp.add(new AbstractMap.SimpleEntry<String, Double>(docs.get(j).topic, similarity));
+    					Collections.sort(temp,wordDoubleComparator);
+        				if(temp.size()>knn) temp.remove(temp.size()-1);
+    				}
+    			HashMap<String, Integer> count = new HashMap<String, Integer>();
+    			for(int j=0;j<temp.size();j++){
+    				if(count.containsKey(temp.get(j).getKey())){
+    					count.put(temp.get(j).getKey(), count.get(temp.get(j).getKey())+1);
+    				}
+    				else count.put(temp.get(j).getKey(), 1);
+    			}
+    			String maxTopic = "";
+    			int maxAmount = 0;
+    			for(HashMap.Entry<String, Integer> entry: count.entrySet()){
+    				if(entry.getValue().compareTo(maxAmount)>0){
+    					maxAmount = entry.getValue();
+    					maxTopic = entry.getKey();
+    				}
+    			}
+    			docs.get(i).topic = maxTopic;
+    		}
+    	wordset = null;
+    }
     
     public void buildQueryExpension(){
     	expension = new HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Double>>>();

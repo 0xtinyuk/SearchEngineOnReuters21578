@@ -94,7 +94,7 @@ public class CorpusPreprocessing {
 	public ArrayList<Document> reuters(){
 		try{
 			//for(int i=0;i<=21;i++){
-			for(int i=0;i<=0;i++){
+			for(int i=0;i<=1;i++){
 				String fileName = "reuters21578/reut2-0";
 				if(i<10) fileName = fileName+"0";
 				fileName = fileName+i+".sgm";
@@ -130,7 +130,7 @@ public class CorpusPreprocessing {
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println(this.rdocAmount);
+		System.out.println("docs:"+this.rdocAmount);
 		return this.rdocs;
 	}
 }

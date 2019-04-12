@@ -64,7 +64,7 @@ public class MainFrame {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 600, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
@@ -76,7 +76,7 @@ public class MainFrame {
 		
 		textField_Query = new JTextField();
 		panel.add(textField_Query);
-		textField_Query.setColumns(20);
+		textField_Query.setColumns(22);
 		
 		
 		
@@ -128,7 +128,7 @@ public class MainFrame {
 		JTextArea textArea_Result = new JTextArea();
 		textArea_Result.setEditable(false);
 		panel_Result.add(textArea_Result);
-		textArea_Result.setColumns(32);
+		textArea_Result.setColumns(45);
 		textArea_Result.setRows(7);
 		textArea_Result.setLineWrap(true);
 		JScrollPane pane = new JScrollPane(textArea_Result,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -148,6 +148,20 @@ public class MainFrame {
 			}
 		});
 		panel.add(btnSearch);
+		
+		JButton btnCompletion = new JButton("Completion");
+		btnCompletion.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String query = textField_Query.getText();
+				boolean reuters = rdbtn_Reuters.isSelected();
+				boolean stemming = chckbx_stemming.isSelected();
+				boolean normalization = chckbx_normalization.isSelected();
+				boolean stopword = chckbx_Stopword.isSelected();
+				String suggestion = Do.queryCompletion(query,stemming,stopword,normalization,reuters);
+				JOptionPane.showMessageDialog(null, suggestion,"Query Completion",JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		panel.add(btnCompletion);
 	}
 
 }

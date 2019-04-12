@@ -14,9 +14,14 @@ public class Dictionary {
 	private HashMap<String, ArrayList<Integer>> tf;
 	public HashMap<String, ArrayList<Double>> tfidf;
 	private HashMap<String, Integer> bigram;
-	public HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Integer>>> completion,expension;
+	public HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Integer>>> completion;
+	public HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Double>>> expension;
 	public boolean stemming,stopword,normalization;
+	public boolean hasExpension,hasCompletion;
 	private int completionThreshold = 1;//The threshold value of query completion -> suggest only when the bi-gram frequency > threshold
+	private int completionListLength = 10;//The max amount of options of completion for each word
+	private int expensionListLength = 5;//The max amount of options of completion for each word
+	private double expensionThreshold = 0.1;
 	
 	public Dictionary(){
 		dict = new HashMap<String,HashSet<Integer>>();
@@ -27,6 +32,8 @@ public class Dictionary {
 			e.printStackTrace();
 		}
 		dictString = "";
+		hasExpension=false;
+		hasCompletion=false;
 	}
 	
 	public void inputFromStopwordsFile(String fileName) throws IOException{
@@ -69,8 +76,7 @@ public class Dictionary {
 				}
 				if(stopword && stopwords.contains(str)) {lastWord="";continue;}
 				if(isNumeric(str)){lastWord= "";continue;}
-				buildBiGram(lastWord,str);
-				lastWord = str;
+				
 				if(stemming){
 					stemmer.setCurrent(str);
 					if(stemmer.stem()){
@@ -78,6 +84,9 @@ public class Dictionary {
 						//System.out.println(str);
 					}
 				}
+				
+				buildBiGram(lastWord,str);
+				lastWord = str;
 				
 				if(dict.containsKey(str)){
 					HashSet<Integer> index = dict.get(str);
@@ -105,8 +114,7 @@ public class Dictionary {
 				}
 				if(stopword && stopwords.contains(str)) {lastWord="";continue;}
 				if(isNumeric(str)){lastWord="";continue;}
-				buildBiGram(lastWord,str);
-				lastWord = str;
+				
 				if(stemming){
 					stemmer.setCurrent(str);
 					if(stemmer.stem()){
@@ -114,6 +122,9 @@ public class Dictionary {
 						//System.out.println(str);
 					}
 				}
+				
+				buildBiGram(lastWord,str);
+				lastWord = str;
 				
 				if(dict.containsKey(str)){
 					HashSet<Integer> index = dict.get(str);
@@ -236,14 +247,16 @@ public class Dictionary {
 		}
 		//System.out.println(dict.size());
 		
-		buildQueryCompletion();//build up query completion
+		hasExpension=false;
+		hasCompletion=false;
+		//buildQueryCompletion();//build up query completion
+		//buildQueryExpension();
 
 		tf=null;
-		bigram=null;
 		return;
 	}
 	
-	Comparator<AbstractMap.SimpleEntry<String,Integer>> wordComparator = 
+	Comparator<AbstractMap.SimpleEntry<String,Integer>> wordIntegerComparator = 
 			new Comparator<AbstractMap.SimpleEntry<String,Integer>>() {//Comparator for suggestions, from large frequency to small
 		@Override
 		public int compare(SimpleEntry<String, Integer> o1, SimpleEntry<String, Integer> o2) {
@@ -252,8 +265,62 @@ public class Dictionary {
 			return 0;
 		}
     };
+    
+    Comparator<AbstractMap.SimpleEntry<String,Double>> wordDoubleComparator = 
+			new Comparator<AbstractMap.SimpleEntry<String,Double>>() {//Comparator for suggestions, from large frequency to small
+		@Override
+		public int compare(SimpleEntry<String, Double> o1, SimpleEntry<String, Double> o2) {
+			if(o1.getValue()<o2.getValue()) return 1;
+			if(o1.getValue()>o2.getValue()) return -1;
+			return 0;
+		}
+    };
+    
+    public void buildQueryExpension(){
+    	expension = new HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Double>>>();
+    	for(HashMap.Entry<String,HashSet<Integer>> e1 : dict.entrySet()){
+    		for(HashMap.Entry<String,HashSet<Integer>> e2 : dict.entrySet()){
+        		if(e1.getKey().compareTo(e2.getKey())>=0) continue;//calculate only when str1<str2 to avoid calculate twice for performance
+        		HashSet<Integer> Temp = (HashSet<Integer>)e1.getValue().clone();
+        		Temp.retainAll(e2.getValue());
+        		int intersection = Temp.size();
+        		Temp = (HashSet<Integer>)e1.getValue().clone();
+        		Temp.addAll(e2.getValue());
+        		int union=Temp.size();
+        		Double jaccardDistance = ((double)intersection)/((double)union);
+        		if(jaccardDistance>expensionThreshold){
+        			if(expension.containsKey(e1.getKey())){
+        				ArrayList<AbstractMap.SimpleEntry<String,Double>> tempArr = expension.get(e1.getKey());
+        				tempArr.add(new AbstractMap.SimpleEntry<String, Double>(e2.getKey(), jaccardDistance));
+        				Collections.sort(tempArr,wordDoubleComparator);
+        				if(tempArr.size()>expensionListLength) tempArr.remove(tempArr.size()-1);
+        				expension.put(e1.getKey(), tempArr);
+        			}
+        			else{
+        				ArrayList<AbstractMap.SimpleEntry<String,Double>> tempArr = new ArrayList<AbstractMap.SimpleEntry<String,Double>>();
+        				tempArr.add(new AbstractMap.SimpleEntry<String, Double>(e2.getKey(), jaccardDistance));
+        				expension.put(e1.getKey(), tempArr);
+        			}
+        		
+        			if(expension.containsKey(e2.getKey())){
+        				ArrayList<AbstractMap.SimpleEntry<String,Double>> tempArr = expension.get(e2.getKey());
+        				tempArr.add(new AbstractMap.SimpleEntry<String, Double>(e1.getKey(), jaccardDistance));
+        				Collections.sort(tempArr,wordDoubleComparator);
+        				if(tempArr.size()>expensionListLength) tempArr.remove(tempArr.size()-1);
+        				expension.put(e2.getKey(), tempArr);
+        			}
+        			else{
+        				ArrayList<AbstractMap.SimpleEntry<String,Double>> tempArr = new ArrayList<AbstractMap.SimpleEntry<String,Double>>();
+        				tempArr.add(new AbstractMap.SimpleEntry<String, Double>(e1.getKey(), jaccardDistance));
+        				expension.put(e2.getKey(), tempArr);
+        			}
+        		}
+        	}
+    	}
+    	hasExpension = true;
+    }
 	
-	private void buildQueryCompletion(){
+	public void buildQueryCompletion(){
 		completion = new HashMap<String,ArrayList<AbstractMap.SimpleEntry<String,Integer>>>();
 		for(HashMap.Entry<String, Integer> entry : bigram.entrySet()){
 			if(entry.getValue()<completionThreshold) continue;
@@ -262,8 +329,8 @@ public class Dictionary {
 			if(completion.containsKey(wl[0])){
 				ArrayList<AbstractMap.SimpleEntry<String,Integer>> tempArr = completion.get(wl[0]);
 				tempArr.add(new AbstractMap.SimpleEntry<String, Integer>(wl[1], entry.getValue()));
-				Collections.sort(tempArr,wordComparator);
-				if(tempArr.size()>10) tempArr.remove(tempArr.size()-1);
+				Collections.sort(tempArr,wordIntegerComparator);
+				if(tempArr.size()>completionListLength) tempArr.remove(tempArr.size()-1);
 				completion.put(wl[0], tempArr);
 			}
 			else{
@@ -272,6 +339,8 @@ public class Dictionary {
 				completion.put(wl[0], tempArr);
 			}
 		}
+		bigram=null;
+		hasCompletion = true;
 	}
 	
 	public static boolean isNumeric(String str) {//check if the str is a number

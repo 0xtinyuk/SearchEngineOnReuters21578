@@ -64,7 +64,7 @@ public class MainFrame {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 600, 300);
+		frame.setBounds(100, 100, 800, 400);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
@@ -76,7 +76,7 @@ public class MainFrame {
 		
 		textField_Query = new JTextField();
 		panel.add(textField_Query);
-		textField_Query.setColumns(22);
+		textField_Query.setColumns(25);
 		
 		
 		
@@ -86,6 +86,27 @@ public class MainFrame {
 		JPanel panel_Source = new JPanel();
 		panel_Configuration.add(panel_Source);
 		panel_Source.setLayout(new GridLayout(2, 1, 0, 0));
+		
+		JPanel panel_FileAmount = new JPanel();
+		panel_Configuration.add(panel_FileAmount);
+		panel_FileAmount.setLayout(new GridLayout(3, 1, 0, 0));
+		
+		JLabel lblFileAmount = new JLabel("Reuters File Amount:");
+		panel_FileAmount.add(lblFileAmount);
+		
+		JTextField textField_FileAmount = new JTextField();
+		panel_FileAmount.add(textField_FileAmount);
+		textField_FileAmount.setColumns(3);
+		textField_FileAmount.setText(String.valueOf(Do.reutersFileAmount));
+		
+		JButton btnFileAmount = new JButton("Input Reuters");
+		btnFileAmount.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int fileAmount = Integer.parseInt(textField_FileAmount.getText());
+				Do.inputReuters(fileAmount);
+			}
+		});
+		panel_FileAmount.add(btnFileAmount);
 		
 		JRadioButton rdbtn_UofO = new JRadioButton("UofO-CSI-Courses");
 		panel_Source.add(rdbtn_UofO);
@@ -128,8 +149,8 @@ public class MainFrame {
 		JTextArea textArea_Result = new JTextArea();
 		textArea_Result.setEditable(false);
 		panel_Result.add(textArea_Result);
-		textArea_Result.setColumns(45);
-		textArea_Result.setRows(7);
+		textArea_Result.setColumns(60);
+		textArea_Result.setRows(12);
 		textArea_Result.setLineWrap(true);
 		JScrollPane pane = new JScrollPane(textArea_Result,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		panel_Result.add(pane);
@@ -162,6 +183,20 @@ public class MainFrame {
 			}
 		});
 		panel.add(btnCompletion);
+		
+		JButton btnExpension = new JButton("Expension");
+		btnExpension.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String query = textField_Query.getText();
+				boolean reuters = rdbtn_Reuters.isSelected();
+				boolean stemming = chckbx_stemming.isSelected();
+				boolean normalization = chckbx_normalization.isSelected();
+				boolean stopword = chckbx_Stopword.isSelected();
+				String expensionStr = Do.queryExpension(query,stemming,stopword,normalization,reuters);
+				JOptionPane.showMessageDialog(null, expensionStr,"Query Expension",JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		panel.add(btnExpension);
 	}
 
 }

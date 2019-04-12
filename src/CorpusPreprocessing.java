@@ -91,10 +91,10 @@ public class CorpusPreprocessing {
     }
 	
 	
-	public ArrayList<Document> reuters(){
+	public ArrayList<Document> reuters(int fileAmount){
 		try{
 			//for(int i=0;i<=21;i++){
-			for(int i=0;i<=1;i++){
+			for(int i=0;i<fileAmount;i++){
 				String fileName = "reuters21578/reut2-0";
 				if(i<10) fileName = fileName+"0";
 				fileName = fileName+i+".sgm";

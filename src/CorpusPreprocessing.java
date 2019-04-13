@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.regex.*;
 
 import java.util.*;
@@ -115,9 +116,14 @@ public class CorpusPreprocessing {
 							String desc = tempList.size()>0?
 									(tempList.get(0).replaceAll("<[^>]+>", "").replaceAll("&nbsp;", "").replaceAll("&(.{0,4}?);", "")):"";
 							tempList = getReutersMatchers("<TOPICS>[.\\s\\S]*?</TOPICS>", string);
-							String topic = tempList.size()>0?
-									(tempList.get(0).replaceAll("<[^>]+>", "").replaceAll("&nbsp;", "").replaceAll("&(.{0,4}?);", "")):"";
-							rdocs.add(new Document(this.rdocAmount,title,desc,topic));
+							String[] topics = null;
+							String ttemp;
+							if(tempList.size()>0){
+								topics = tempList.get(0).replaceAll("&nbsp;", "").replaceAll("&(.{0,4}?);", "")
+										.replaceAll("</D><D>", " ").replaceAll("<[^>]+>", "").split(" ");
+								
+							}
+							rdocs.add(new Document(this.rdocAmount,title,desc,topics));
 							this.rdocAmount++;
 							this.rsrcText = "";
 						}

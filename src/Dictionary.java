@@ -285,6 +285,16 @@ public class Dictionary {
 		}
     };
     
+    Comparator<AbstractMap.SimpleEntry<HashSet<String>,Double>> wordSetDoubleComparator = 
+			new Comparator<AbstractMap.SimpleEntry<HashSet<String>,Double>>() {
+		@Override
+		public int compare(SimpleEntry<HashSet<String>, Double> o1, SimpleEntry<HashSet<String>, Double> o2) {
+			if(o1.getValue()<o2.getValue()) return 1;
+			if(o1.getValue()>o2.getValue()) return -1;
+			return 0;
+		}
+    };
+    
     private double docDistance(int x,int y){//return the distance of doc x and doc y
     	HashSet<String> Temp = (HashSet<String>)wordset.get(x).clone();
 		Temp.retainAll(wordset.get(y));
@@ -297,31 +307,36 @@ public class Dictionary {
     
     public void topicsAssign(ArrayList<Document> docs){
     	for (int i = 0; i < docs.size(); i++) 
-    		if(docs.get(i).topic.equals("")){
-    			ArrayList<AbstractMap.SimpleEntry<String,Double>> temp = new ArrayList<AbstractMap.SimpleEntry<String,Double>>();
+    		if(docs.get(i).topics.size()==0){
+    			ArrayList<AbstractMap.SimpleEntry<HashSet<String>,Double>> temp = 
+    					new ArrayList<AbstractMap.SimpleEntry<HashSet<String>,Double>>();
     			for (int j = 0; j < docs.size(); j++) 
-    				if(i!=j && !docs.get(j).topic.equals("")){
+    				if(i!=j && docs.get(j).topics.size()>0){
     					double similarity = docDistance(i, j);
-    					temp.add(new AbstractMap.SimpleEntry<String, Double>(docs.get(j).topic, similarity));
-    					Collections.sort(temp,wordDoubleComparator);
+    					temp.add(new AbstractMap.SimpleEntry<HashSet<String>, Double>(docs.get(j).topics, similarity));
+    					Collections.sort(temp,wordSetDoubleComparator);
         				if(temp.size()>knn) temp.remove(temp.size()-1);
     				}
     			HashMap<String, Integer> count = new HashMap<String, Integer>();
     			for(int j=0;j<temp.size();j++){
-    				if(count.containsKey(temp.get(j).getKey())){
-    					count.put(temp.get(j).getKey(), count.get(temp.get(j).getKey())+1);
+    				for(String str:temp.get(j).getKey()){
+    					if(count.containsKey(str)){
+    						count.put(str, count.get(str)+1);
+    					}
+    					else count.put(str, 1);
     				}
-    				else count.put(temp.get(j).getKey(), 1);
     			}
-    			String maxTopic = "";
     			int maxAmount = 0;
     			for(HashMap.Entry<String, Integer> entry: count.entrySet()){
-    				if(entry.getValue().compareTo(maxAmount)>0){
+    				if(entry.getValue()>maxAmount){
     					maxAmount = entry.getValue();
-    					maxTopic = entry.getKey();
     				}
     			}
-    			docs.get(i).topic = maxTopic;
+    			for(HashMap.Entry<String, Integer> entry: count.entrySet()){
+    				if(entry.getValue()==maxAmount){
+    					docs.get(i).topics.add(entry.getKey());
+    				}
+    			}
     		}
     	wordset = null;
     }

@@ -24,10 +24,11 @@ public class Main {
 		return;
 	}
 	
-	public void inputReuters(int fileAmount){
+	public void inputReuters(int fileAmount,boolean stemming, boolean stopword, boolean normalization,boolean reuters,boolean topicAssign){
 		reutersFileAmount = fileAmount;
 		CorpusPreprocessing cp = new CorpusPreprocessing();
 		rdocs = cp.reuters(fileAmount);
+		dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
 	}
 	
 	public String queryExpension(String query,boolean stemming, boolean stopword, boolean normalization,boolean reuters,boolean topicAssign){
@@ -39,8 +40,8 @@ public class Main {
 				//Dict is the same as the last time
 			}
 			else{
-				inputReuters(reutersFileAmount);
-				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				inputReuters(reutersFileAmount,stemming,stopword, normalization, reuters,topicAssign);
+				//dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
 				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
@@ -87,8 +88,8 @@ public class Main {
 				//Dict is the same as the last time
 			}
 			else{
-				inputReuters(reutersFileAmount);
-				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				inputReuters(reutersFileAmount,stemming,stopword, normalization, reuters,topicAssign);
+				//dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
 				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
@@ -122,15 +123,16 @@ public class Main {
 		return completionMessage;
 	}
 	
-	public String search(String query, boolean stemming, boolean stopword, boolean normalization, boolean booleanModel,boolean reuters,boolean topicAssign){
+	public String search(String query, boolean stemming, boolean stopword, boolean normalization, boolean booleanModel,
+			boolean reuters,boolean topicAssign,boolean topicRestrction,String topicsRequired){
 		if(reuters){
 			if(hasDict && (hasReuters == reuters) && (hasStemmed==stemming) 
 					&& (hasStopword==stopword) && (hasNormalized==normalization) && (hasTopicAssign == topicAssign)){
 				//Dict is the same as the last time
 			}
 			else{
-				inputReuters(reutersFileAmount);
-				dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
+				inputReuters(reutersFileAmount,stemming,stopword, normalization, reuters,topicAssign);
+				//dictionary.build(rdocs, stopword,stemming, normalization,reuters,topicAssign);
 				hasDict = true;hasReuters = reuters;hasStemmed=stemming;hasStopword=stopword;hasNormalized=normalization;hasTopicAssign=topicAssign;
 			}
 		}
@@ -154,39 +156,46 @@ public class Main {
 				if(reuters){
 					//System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
 					//result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopic:"+rdocs.get(index).topic+"\nDesc: "+rdocs.get(index).description+"\n\n";
-					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopic: "+rdocs.get(index).topic/*+"\nDesc: "+rdocs.get(index).description*/+"\n\n";
+					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()+"\nDesc: "+rdocs.get(index).description+"\n\n";
 				}
 				else{
 					//System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
-					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title+/*"\nDesc: "+docs.get(index).description+*/"\n\n";
+					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title+"\nDesc: "+docs.get(index).description+"\n\n";
 				}
 			}
 		}
 		else{
 			if(reuters){
-				HashSet<Integer> resultIndex = vectorSpaceModel.search(dictionary, rdocs);
-				/*for (Integer index : resultIndex) {
-					System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
-					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nDesc: "+rdocs.get(index).description+"\n\n";
-				}*/	
-				for(Document document : rdocs){
+				if(topicsRequired.equals("")) topicRestrction = false;//If there is no topic specified, we regard it as no topics filter
+				ArrayList<Integer> resultIndex = null;
+				if(reuters && topicRestrction){
+					resultIndex = vectorSpaceModel.search(dictionary, rdocs,true,topicsRequired);
+				}
+				else{
+					resultIndex = vectorSpaceModel.search(dictionary, rdocs,false,"");
+				}
+				for (Integer index : resultIndex) {
+					//System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
+					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()+"\nDesc: "+rdocs.get(index).description+"\n\n";
+				}
+				/*for(Document document : rdocs){
 					if(document.score <=0) break;
 					//System.out.println("docId:"+document.docID+"\ntitle:"+document.title+"\ndesc:"+document.description);
 					//result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic:"+document.topic+"\nDesc: "+document.description+"\n\n";
-					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic: "+document.topic+/*"\nDesc: "+document.description+*/"\n\n";
-				}
+					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic: "+document.topics.toString()+/*"\nDesc: "+document.description+"\n\n";
+				}*/
 			}
 			else{
-				HashSet<Integer> resultIndex = vectorSpaceModel.search(dictionary, docs);
-				/*for (Integer index : resultIndex) {
-					System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
+				ArrayList<Integer> resultIndex = vectorSpaceModel.search(dictionary, docs,false,"");
+				for (Integer index : resultIndex) {
+					//System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
 					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title+"\nDesc: "+docs.get(index).description+"\n\n";
-				}*/	
-				for(Document document : docs){
+				}
+				/*for(Document document : docs){
 					if(document.score <=0) break;
 					//System.out.println("docId:"+document.docID+"\ntitle:"+document.title+"\ndesc:"+document.description);
-					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+/*"\nDesc: "+document.description+*/"\n\n";
-				}
+					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+/*"\nDesc: "+document.description+"\n\n";
+				}*/
 			}
 			
 		}

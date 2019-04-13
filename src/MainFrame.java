@@ -100,12 +100,7 @@ public class MainFrame {
 		textField_FileAmount.setText(String.valueOf(Do.reutersFileAmount));
 		
 		JButton btnFileAmount = new JButton("Input Reuters");
-		btnFileAmount.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int fileAmount = Integer.parseInt(textField_FileAmount.getText());
-				Do.inputReuters(fileAmount);
-			}
-		});
+		
 		panel_FileAmount.add(btnFileAmount);
 		
 		JRadioButton rdbtn_UofO = new JRadioButton("UofO-CSI-Courses");
@@ -145,6 +140,15 @@ public class MainFrame {
 		JCheckBox chckbx_TopicAssign = new JCheckBox("TopicAssign");
 		panel_Options.add(chckbx_TopicAssign);
 		
+		JPanel panel_topic_choosing = new JPanel();
+		panel_topic_choosing.setLayout(new GridLayout(0, 1, 0, 0));
+		panel_Configuration.add(panel_topic_choosing);
+		JCheckBox chckbx_TopicRestriction = new JCheckBox("TopicRestriction");
+		panel_topic_choosing.add(chckbx_TopicRestriction);
+		JTextField textField_TopicRestrction = new JTextField();
+		panel_topic_choosing.add(textField_TopicRestrction);
+		textField_TopicRestrction.setColumns(3);
+		
 		JPanel panel_Result = new JPanel();
 		frame.getContentPane().add(panel_Result);
 		
@@ -157,6 +161,19 @@ public class MainFrame {
 		JScrollPane pane = new JScrollPane(textArea_Result,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		panel_Result.add(pane);
 		
+		btnFileAmount.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int fileAmount = Integer.parseInt(textField_FileAmount.getText());
+				boolean reuters = rdbtn_Reuters.isSelected();
+				boolean stemming = chckbx_stemming.isSelected();
+				boolean normalization = chckbx_normalization.isSelected();
+				boolean stopword = chckbx_Stopword.isSelected();
+				boolean topicAssign = chckbx_TopicAssign.isSelected();
+				Do.inputReuters(fileAmount,stemming,stopword, normalization, reuters,topicAssign);
+				JOptionPane.showMessageDialog(null, "Success","Load Files",JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		
 		JButton btnSearch = new JButton("Search");
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -167,7 +184,9 @@ public class MainFrame {
 				boolean stopword = chckbx_Stopword.isSelected();
 				boolean bm = rdbtn_BooleanModel.isSelected();
 				boolean topicAssign = chckbx_TopicAssign.isSelected();
-				String result = Do.search(query,stemming,stopword,normalization,bm,reuters,topicAssign);
+				boolean topicRestrction = chckbx_TopicRestriction.isSelected();
+				String topics = textField_TopicRestrction.getText();
+				String result = Do.search(query,stemming,stopword,normalization,bm,reuters,topicAssign,topicRestrction,topics);
 				textArea_Result.setText(result);
 			}
 		});

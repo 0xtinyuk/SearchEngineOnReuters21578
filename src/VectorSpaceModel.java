@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,20 @@ public class VectorSpaceModel {
 		this.query = qu;
 	}
 	
-	public HashSet<Integer> search(Dictionary dictionary,ArrayList<Document> docs){
+	private HashSet<String> extractTopics(String TopicsRequired){
+		HashSet<String> result = new HashSet<String>();
+		String[] wordlist = TopicsRequired.trim().split(" ");
+		for(String str:wordlist){
+			result.add(str);
+		}
+		return result;
+	}
+	
+	public ArrayList<Integer> search(Dictionary dictionary,ArrayList<Document> docs, boolean topicRestriction, String TopicsRequired){
+		HashSet<String> topicSet = null;
+		if(topicRestriction){
+			topicSet = extractTopics(TopicsRequired);
+		}
 		SnowballStemmer stemmer = new englishStemmer();
 		this.query = this.query.replaceAll(" +", " ").toLowerCase();
 		String wordlist[] = this.query.split(" ");
@@ -114,7 +128,7 @@ public class VectorSpaceModel {
 			}
 		}
 		
-		ArrayList<Document> documents = docs;
+		ArrayList<Document> documents = (ArrayList<Document>) docs.clone();
 		for (String str : wordlist) {
 			if(dictionary.normalization){
 				str = str.replaceAll("[\\-\\.]", "");
@@ -129,7 +143,7 @@ public class VectorSpaceModel {
 			ArrayList<Double> tempArr = dictionary.tfidf.get(str);
 			if(dictionary.dict.get(str)==null) continue;
 			for (Integer index : dictionary.dict.get(str)) {
-				docs.get(index).score += Q.get(str)*tempArr.get(index)/Math.sqrt(L.get(index));
+				documents.get(index).score += Q.get(str)*tempArr.get(index)/Math.sqrt(L.get(index));
 			}
 		}
 		Collections.sort(documents, new Comparator<Document>() {
@@ -138,11 +152,16 @@ public class VectorSpaceModel {
             }
         });
 		
-		HashSet<Integer> result = new HashSet<>();
+		ArrayList<Integer> result = new ArrayList<Integer>();
 		for(Document document : documents){
 			if(document.score <=0) break;
 			//System.out.println(document.docID);
-			result.add(document.docID);
+			if(topicRestriction){
+				HashSet<String> tempSet = (HashSet<String>) document.topics.clone();
+				tempSet.retainAll(topicSet);
+				if(tempSet.size()>0) result.add(document.docID);
+			}
+			else result.add(document.docID);
 		}
 		return result;
 	}

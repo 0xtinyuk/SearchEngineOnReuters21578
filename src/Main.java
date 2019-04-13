@@ -156,11 +156,11 @@ public class Main {
 				if(reuters){
 					//System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
 					//result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopic:"+rdocs.get(index).topic+"\nDesc: "+rdocs.get(index).description+"\n\n";
-					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()+"\nDesc: "+rdocs.get(index).description+"\n\n";
+					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()/*+"\nDesc: "+rdocs.get(index).description*/+"\n";
 				}
 				else{
 					//System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
-					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title+"\nDesc: "+docs.get(index).description+"\n\n";
+					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title/*+"\nDesc: "+docs.get(index).description*/+"\n";
 				}
 			}
 		}
@@ -176,26 +176,15 @@ public class Main {
 				}
 				for (Integer index : resultIndex) {
 					//System.out.println("docId:"+rdocs.get(index).docID+"\ntitle:"+rdocs.get(index).title+"\ndesc:"+rdocs.get(index).description);
-					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()+"\nDesc: "+rdocs.get(index).description+"\n\n";
+					result = result +"DocId:"+rdocs.get(index).docID+"\nTitle: "+rdocs.get(index).title+"\nTopics: "+rdocs.get(index).topics.toString()/*+"\nDesc: "+rdocs.get(index).description*/+"\n";
 				}
-				/*for(Document document : rdocs){
-					if(document.score <=0) break;
-					//System.out.println("docId:"+document.docID+"\ntitle:"+document.title+"\ndesc:"+document.description);
-					//result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic:"+document.topic+"\nDesc: "+document.description+"\n\n";
-					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+"\nTopic: "+document.topics.toString()+/*"\nDesc: "+document.description+"\n\n";
-				}*/
 			}
 			else{
 				ArrayList<Integer> resultIndex = vectorSpaceModel.search(dictionary, docs,false,"");
 				for (Integer index : resultIndex) {
 					//System.out.println("docId:"+docs.get(index).docID+"\ntitle:"+docs.get(index).title+"\ndesc:"+docs.get(index).description);
-					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title+"\nDesc: "+docs.get(index).description+"\n\n";
+					result = result +"DocId:"+docs.get(index).docID+"\nTitle: "+docs.get(index).title/*+"\nDesc: "+docs.get(index).description*/+"\n";
 				}
-				/*for(Document document : docs){
-					if(document.score <=0) break;
-					//System.out.println("docId:"+document.docID+"\ntitle:"+document.title+"\ndesc:"+document.description);
-					result = result +"DocId:"+document.docID+"\nTitle: "+document.title+/*"\nDesc: "+document.description+"\n\n";
-				}*/
 			}
 			
 		}

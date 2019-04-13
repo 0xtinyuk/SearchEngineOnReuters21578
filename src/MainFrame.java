@@ -64,7 +64,7 @@ public class MainFrame {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 800, 400);
+		frame.setBounds(100, 100, 800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
@@ -156,7 +156,7 @@ public class MainFrame {
 		textArea_Result.setEditable(false);
 		panel_Result.add(textArea_Result);
 		textArea_Result.setColumns(60);
-		textArea_Result.setRows(12);
+		textArea_Result.setRows(23);
 		textArea_Result.setLineWrap(true);
 		JScrollPane pane = new JScrollPane(textArea_Result,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		panel_Result.add(pane);

@@ -91,17 +91,12 @@ public class BooleanRetrievalModel {
 						//System.out.println(str);
 					}
 				}
-				
 				HashSet<Integer> resultIndexTemp = new HashSet<Integer>();
-				//HashSet<Integer> tt;
 				word = " "+word.replaceAll("\\?", "[^ ]?").replaceAll("\\*", "[^ ]*?")+" ";
-				//System.out.println(word);
 				Pattern pattern = Pattern.compile(word);
 		        Matcher matcher = pattern.matcher(dictionary.dictString);
 		        while (matcher.find()) {
 		        	String target = matcher.group().trim();
-		        	//System.out.println(target);
-		        	//System.out.println(tt);
 		            resultIndexTemp.addAll(dictionary.dict.get(target));
 		        }
 		        stack.push(resultIndexTemp);

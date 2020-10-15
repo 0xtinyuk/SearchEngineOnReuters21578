@@ -8,8 +8,5 @@ SearchEngine based on reuters21578
 
 ## Usage
 
-```
-* Extract all the files of reuters21578 and place them into "reuters21578" directory
-* Launch the program from src/MainFrame.java
-
-```
+- Extract all the files of reuters21578 and place them into "reuters21578" directory
+- Launch the program from src/MainFrame.java

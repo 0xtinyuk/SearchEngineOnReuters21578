@@ -2,13 +2,9 @@
 
 SearchEngine based on reuters21578
 
-```
-
 ## Requirements:
 
-* [Reuters-21578 Distribution 1.0](https://archive.ics.uci.edu/ml/datasets/Reuters-21578+Text+Categorization+Collection)
-
-```
+- [Reuters-21578 Distribution 1.0](https://archive.ics.uci.edu/ml/datasets/Reuters-21578+Text+Categorization+Collection)
 
 ## Usage
 
